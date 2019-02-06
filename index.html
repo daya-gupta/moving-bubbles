@@ -1,0 +1,185 @@
+<html>
+    <head>
+        <style>
+            .bubble {
+                height: 80px;
+                width: 80px;
+                background: rgba(222,222,222,.2);
+                border: 1px solid #aaa;
+                display: block;
+                border-radius: 40px;
+                position: absolute;
+                top: 10px;
+            }
+            body {
+                counter-reset: bubble-counter;
+                overflow: hidden;
+            }
+            .bubble {
+                counter-increment: bubble-counter;
+            }
+            .bubble:after {
+                content: counter(bubble-counter);
+                font-weight: bold;
+                color: red;
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                transform: translate(-50%, -50%);
+            }
+        </style>
+    </head>
+    <body>
+        <h4 style="display: inline;">This is a poc on bubble movements...</h3>
+        <button onclick="addNewBuble()">Add a new bubble</button>
+        <button onclick="removeBuble()">Remove a bubble</button>
+        <script src="../dist/bundle.js"></script>
+        <script>
+            const bubbles = [];
+            function addNewBuble() {
+                // create a bubble node and append in DOM
+                var b = document.createElement('div');
+                b.setAttribute('class', 'bubble');
+                b.style.left=bubbles.length * 100 + 'px';
+                document.body.append(b);
+                bubbles.push(b);
+                moveNode(b);
+            }
+
+            function removeBuble() {
+                var lastBubble = bubbles.splice(bubbles.length - 1, 1)[0];
+                lastBubble.remove();
+            }
+
+            // var node = document.querySelector('#bubble');
+            // var node2 = document.querySelector('#bubble2');
+
+            function moveNode(node) {
+                function moveAfterCollision(sin, cos, m, otherNode) {
+                    clearInterval(node.vertical);
+                    node.style.top = Number(node.style.top.replace('px', '')) + cos + 'px';
+                    node.vertical = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.top = Number(node.style.top.replace('px', '')) + cos + 'px';
+                        })
+                    }, 10);
+                    clearInterval(node.horizontal);
+                    node.style.left = Number(node.style.left.replace('px', '')) + sin + 'px';
+                    node.horizontal = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.left = Number(node.style.left.replace('px', '')) + sin + 'px';
+                        })
+                    }, 10);
+
+                    clearInterval(otherNode.vertical);
+                    otherNode.style.top = Number(otherNode.style.top.replace('px', '')) - 1 + 'px';
+                    otherNode.vertical = setInterval(() => {
+                        moveBubble(() => {
+                            otherNode.style.top = Number(otherNode.style.top.replace('px', '')) - 1 + 'px';
+                        }, otherNode)
+                    }, 10);
+                    clearInterval(otherNode.horizontal);
+                    otherNode.style.left = Number(otherNode.style.left.replace('px', '')) - 1 + 'px';
+                    otherNode.horizontal = setInterval(() => {
+                        moveBubble(() => {
+                            otherNode.style.left = Number(otherNode.style.left.replace('px', '')) - 1 + 'px';
+                        }, otherNode)
+                    }, 10);
+                }
+                function moveBubble(callback, item) {
+                    node = item || node;
+                    var left = Number(node.style.left.replace('px', ''));
+                    var top = Number(node.style.top.replace('px', ''));
+                    // if (node.id !== 'bubble2') {
+                    //     // distance between bubbles
+                    //     var left2 = Number(node2.style.left.replace('px', ''));
+                    //     var top2 = Number(node2.style.top.replace('px', ''));
+                    //     var distance = Math.sqrt(Math.pow(left-left2, 2) + Math.pow(top - top2, 2));
+                    //     if (distance < 80) {
+                    //         // collosion - do something and return from here itself
+                    //         // calculate slope
+                    //         var m = Math.abs((top - top2)/(left - left2));
+                    //         var sin = Math.abs((top - top2)/distance);
+                    //         var cos = Math.abs((left - left2)/distance);
+                    //         // stop all timers and start movement again
+                    //         moveAfterCollision(sin, cos, m, node2);
+                    //         return;
+                    //     }
+                    // }
+                    if (left <= 0 || left + 80 >= window.innerWidth || top <= 0 || top + 80 >= window.innerHeight) {
+                        if (left <= 0) {
+                            moveRight(1);
+                        } else if (left + 80 >= window.innerWidth) {
+                            moveLeft(1);
+                        }
+                        if (top <= 0) {
+                            moveDownwards(1);
+                        } else if (top + 80 >= window.innerHeight) {
+                            moveUpwards(1);
+                        }
+                    } else {
+                        callback && callback();
+                    } 
+                }
+
+                function moveDownwards(param) {
+                    clearInterval(node.vertical);
+                    node.style.top = Number(node.style.top.replace('px', '')) + param + 'px';
+                    node.vertical = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.top = Number(node.style.top.replace('px', '')) + param + 'px';
+                        })
+                    }, 10);
+                }
+
+                function moveLeft(param) {
+                    clearInterval(node.horizontal);
+                    node.style.left = Number(node.style.left.replace('px', '')) - param + 'px';
+                    node.horizontal = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.left = Number(node.style.left.replace('px', '')) - param + 'px';
+                        })
+                    }, 10);
+                }
+
+                function moveUpwards(param) {
+                    clearInterval(node.vertical);
+                    node.style.top = Number(node.style.top.replace('px', '')) - param + 'px';
+                    node.vertical = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.top = Number(node.style.top.replace('px', '')) - param + 'px';
+                        })
+                    }, 10);
+                }
+
+                function moveRight(param) {
+                    clearInterval(node.horizontal);
+                    node.style.left = Number(node.style.left.replace('px', '')) + param + 'px';
+                    node.horizontal = setInterval(() => {
+                        moveBubble(() => {
+                            node.style.left = Number(node.style.left.replace('px', '')) + param + 'px';
+                        })
+                    }, 10);
+                }
+
+                // var vertical = node && setInterval(moveBubble, 10);
+                node.vertical = setInterval(() => {
+                    moveBubble(() => {
+                        node.style.top = Number(node.style.top.replace('px', '')) + 1 + 'px';
+                    })
+                }, 10);
+                node.horizontal = setInterval(() => {
+                    moveBubble(() => {
+                        node.style.left = Number(node.style.left.replace('px', '')) + 1 + 'px';
+                    })
+                }, 10);
+            }
+
+            // moveNode(node);
+            // moveNode(node2);
+            addNewBuble();
+            
+        </script>
+        <!-- <script src="./index.js"></script> -->
+    </body>
+</html>
